@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Danışman Kadro Planlama ve Optimizasyon Veri Şeması",
+  "description": "Modelin Excel dosyasından beklediği sütun tanımları. Bu şema veriden bağımsızdır; kurumsal veya kişisel hiçbir veri içermez.",
+  "type": "object",
+  "sheets": {
+    "Özet Çalışma": {
+      "description": "Ana veri sayfası. 81 il ve model göstergelerini içerir.",
+      "required_columns": [
+        "81 İl",
+        "2025 Nüfus",
+        "81 İlde kaç danışman mevcut",
+        "Skor",
+        "Öneri",
+        "2024 Gayri Safi Yurtiçi Hasıla ( Sıra )",
+        "Yapı Kredi Şube Sayısı (Allianz)-Sıra",
+        "Akbank Şube Sayısı-Sıra",
+        "Vakıfbank&Ziraat&Halkbank Şube Sayısı (Türkiye Sigorta)-Sıra",
+        "İş Bankası Şube Sayısı-Sıra",
+        "Ort. Satılık Konut  Birim m2 Satış Fiyatı (TL/m2)-Mayıs 2025 verileri ( Sıra )",
+        "2025 Toplam Konut+ İşyeri Satış Adet ( Sıra )",
+        "2025 İstihdam oranı (%) ( Sıra )",
+        "2025 Toplam Motorlu Kara Taşıtları Sayısı ( Sıra )",
+        "2026 Döviz Bürosu Sayısı ( Sıra)",
+        "2025 Yabancılara Satılan Konut+ İşyeri Sayısı ( Sıra )",
+        "2024 Banka Şube Sayıları ( Sıra )",
+        "2024 Mevduat Hacmi ( Sıra)",
+        "2024-ATM Sayısı ( Sıra)",
+        "POLİÇE SAYISI ( Sıra)",
+        "SİGORTA ETTİREN SAYISI ( Sıra)",
+        "İl Sigortalı Oranı ( 1000 kişide) ( Sıra)",
+        "POLİÇE SAYISI",
+        "2024 Gayri Safi Yurtiçi Hasıla",
+        "Yapı Kredi Şube Sayısı (Allianz)",
+        "Akbank Şube Sayısı",
+        "Vakıfbank&Ziraat&Halkbank Şube Sayısı (Türkiye Sigorta)",
+        "İş Bankası Şube Sayısı",
+        "Ort. Satılık Konut  Birim m2 Satış Fiyatı (TL/m2)-Mayıs 2025 verileri",
+        "2025 Toplam Konut+ İşyeri Satış Adet",
+        "2025 İstihdam oranı (%)",
+        "2025 Toplam Motorlu Kara Taşıtları Sayısı",
+        "2026 Döviz Bürosu Sayısı",
+        "2025 Yabancılara Satılan Konut+ İşyeri Sayısı",
+        "2024 Banka Şube Sayıları",
+        "2024 Mevduat Hacmi",
+        "2024-ATM Sayısı",
+        "İl Sigortalı Oranı ( 1000 kişide)"
+      ]
+    },
+    "Hazırlık": {
+      "description": "Opsiyonel hazırlık ekibi kadro sayfası (Kolon A: İl Adı, Kolon B: Hazırlık Danışman Sayısı).",
+      "format": "A: İl Adı, B: Sayısal Değer"
+    },
+    "Model Ayarları": {
+      "description": "Excel'e dışa aktarım (Export) yapıldığında senaryo parametrelerinin yazıldığı sayfa."
+    },
+    "Dashboard Sonuçları": {
+      "description": "Excel'e dışa aktarım (Export) yapıldığında il bazlı optimizasyon çıktılarının yazıldığı sayfa."
+    }
+  }
+}

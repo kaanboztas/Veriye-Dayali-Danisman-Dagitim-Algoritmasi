@@ -1,0 +1,808 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+<meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="81 il için nüfus ve yapısal parametre grupları temelli dinamik danışman kapasite planlama dashboardu"
+    />
+    <title>Danışman Kadro Planlama Merkezi</title>
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+<div class="app-shell">
+      <header class="topbar">
+        <div class="brand-mark" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </div>
+        <div class="brand-copy">
+          <h1>Danışman Kadro Planlama Merkezi</h1>
+          <p class="subtitle">
+            81 il için veri odaklı danışman kadro planlaması
+          </p>
+        </div>
+        <div class="model-status" id="modelStatus">
+          <span class="status-dot"></span>
+          <div>
+            <strong>OPTİMİZASYON MOTORU</strong>
+            <small>Canlı hesaplama başlatılıyor</small>
+          </div>
+        </div>
+      </header>
+
+      <nav class="tabs" aria-label="Dashboard bölümleri">
+        <button class="tab-button active" data-tab="allocation">Danışman Dağılımı</button>
+        <button class="tab-button" data-tab="capacity">Kadro Analizleri</button>
+        <button class="tab-button" data-tab="method">Nedir? Nasıl çalışır?</button>
+      </nav>
+
+      <main>
+        <section class="tab-panel active" id="tab-allocation">
+          <aside class="control-panel">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">SENARYO KONTROLLERİ</p>
+                <h2>Kadro kararını belirle</h2>
+              </div>
+            </div>
+
+            <div class="mode-switch" role="group" aria-label="Hedef hesaplama modu">
+              <button class="active" data-mode="target">
+                <span>Toplam kadro hedefi</span><small>Belirlenen toplam</small>
+              </button>
+              <button data-mode="delta">
+                <span>Net değişim</span><small>Kişi veya yüzde</small>
+              </button>
+            </div>
+
+            <div class="target-control" id="targetControl">
+              <div class="target-control-grid">
+                <div class="target-control-pane">
+                  <label for="targetInput" id="targetLabel">Toplam danışman hedefi</label>
+                  <div class="target-row">
+                    <input id="targetInput" type="number" step="1" value="0" />
+                    <span id="targetUnit">kişi</span>
+                  </div>
+                  <input id="targetSlider" type="range" min="0" max="5000" step="1" value="0" />
+                </div>
+                <div class="target-control-pane percentage-control" id="percentageControl">
+                  <label for="deltaPercentInput">Yüzdesel değişim</label>
+                  <div class="target-row">
+                    <input id="deltaPercentInput" type="number" min="-100" step="0.1" value="0" disabled />
+                    <span>%</span>
+                  </div>
+                  <input id="deltaPercentSlider" type="range" min="-100" max="100" step="0.1" value="0" disabled />
+                  <p class="delta-percent-basis" id="deltaPercentBasis">
+                    Y&#252;zde, se&#231;ili GMY gruplar&#305;n&#305;n mevcut kadrosu &#252;zerinden hesaplan&#305;r.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="quick-targets" aria-label="Hızlı hedefler" hidden>
+              <button data-quick="conservative"><span>Temkinli</span><strong id="quickConservative">—</strong></button>
+              <button data-quick="base"><span>Model</span><strong id="quickBase">—</strong></button>
+              <button data-quick="growth"><span>Büyüme</span><strong id="quickGrowth">—</strong></button>
+            </div>
+
+            <section class="gm-filter-panel" aria-labelledby="gmFilterTitle">
+              <div class="gm-filter-heading">
+                <div>
+                  <p class="eyebrow">GENEL M&#220;D&#220;R YARDIMCILI&#286;I KAPSAMI</p>
+                  <strong id="gmFilterTitle">&#304;&#351;e al&#305;m yap&#305;lacak gruplar&#305; se&#231;</strong>
+                </div>
+              </div>
+              <p class="gm-filter-help">
+                B&#252;y&#252;mede yeni kadro &#246;nce se&#231;ili GMY gruplar&#305;na, sonra bu gruplardaki illere da&#287;&#305;t&#305;l&#305;r.
+              </p>
+              <div class="gm-filter-options" id="gmFilterOptions">
+                <label class="gm-option gm-option-all"><input id="gmSelectAll" type="checkbox" checked /><span>T&#252;m&#252;</span></label>
+                <label class="gm-option"><input type="checkbox" data-gm-group="ANADOLU" checked /><span>ANADOLU</span></label>
+                <label class="gm-option"><input type="checkbox" data-gm-group="EGE AKDEN&#304;Z" checked /><span>EGE AKDEN&#304;Z</span></label>
+                <label class="gm-option"><input type="checkbox" data-gm-group="MARMARA" checked /><span>MARMARA</span></label>
+                <label class="gm-option"><input type="checkbox" data-gm-group="KARADEN&#304;Z" checked /><span>KARADEN&#304;Z</span></label>
+              </div>
+              <p class="gm-filter-note" id="gmFilterNote" aria-live="polite">
+                T&#252;m gruplar se&#231;ili; mevcut da&#287;&#305;t&#305;m davran&#305;&#351;&#305; korunur.
+              </p>
+            </section>
+
+            <section class="preparation-panel" aria-labelledby="preparationTeamTitle">
+              <div class="preparation-panel-heading">
+                <p class="eyebrow">HAZIRLIK EKİBİ</p>
+                <strong id="preparationTeamTitle">Şehir bazında hazırlık kişi sayısı</strong>
+              </div>
+              <div class="preparation-inputs">
+                <label class="preparation-row" for="preparationIstanbul">
+                  <span>İstanbul</span>
+                  <input id="preparationIstanbul" data-preparation-city="İstanbul" type="number" min="0" step="1" value="0" inputmode="numeric" />
+                </label>
+                <label class="preparation-row" for="preparationIzmir">
+                  <span>İzmir</span>
+                  <input id="preparationIzmir" data-preparation-city="İzmir" type="number" min="0" step="1" value="0" inputmode="numeric" />
+                </label>
+                <label class="preparation-row" for="preparationAnkara">
+                  <span>Ankara</span>
+                  <input id="preparationAnkara" data-preparation-city="Ankara" type="number" min="0" step="1" value="0" inputmode="numeric" />
+                </label>
+              </div>
+              <button class="preparation-reset-button" id="resetPreparationTeam" type="button">
+                Varsayılana Dön
+              </button>
+            </section>
+
+            <div class="weight-block">
+              <div class="weight-heading">
+                <div>
+                  <p class="eyebrow">PARAMETRE AĞIRLIKLARI</p>
+                  <strong>Ağırlıkları düzenle</strong>
+                </div>
+                <span id="groupWeightTotal">5 parametre %100</span>
+              </div>
+              <label for="populationWeight">
+                <span>Nüfus</span><strong id="populationWeightValue">%50</strong>
+              </label>
+              <small class="weight-detail">Beş parametre tek bütçede; birini değiştirince kalanlar dengelenir.</small>
+              <input id="populationWeight" type="range" min="0" max="100" step="0.25" value="50" />
+
+              <label for="wealthFinanceWeight">
+                <span>Zenginlik ve finans</span><strong id="wealthFinanceWeightValue">%12,5</strong>
+              </label>
+              <small class="weight-detail">GSYH, konut fiyatı, mevduat, sigortalı oranı</small>
+              <input
+                id="wealthFinanceWeight"
+                data-group-weight="wealth_finance"
+                type="range"
+                min="0"
+                max="100"
+                step="0.25"
+                value="12.5"
+              />
+
+              <label for="marketActivityWeight">
+                <span>Ekonomik hareketlilik</span><strong id="marketActivityWeightValue">%12,5</strong>
+              </label>
+              <small class="weight-detail">Satış, istihdam, taşıt, poliçe, sigorta ettiren</small>
+              <input
+                id="marketActivityWeight"
+                data-group-weight="market_activity"
+                type="range"
+                min="0"
+                max="100"
+                step="0.25"
+                value="12.5"
+              />
+
+              <label for="competitorActivityWeight">
+                <span>Rakip firma aktifliği</span><strong id="competitorActivityWeightValue">%12,5</strong>
+              </label>
+              <small class="weight-detail">Toplam banka şubesi, ATM</small>
+              <input
+                id="competitorActivityWeight"
+                data-group-weight="competitor_activity"
+                type="range"
+                min="0"
+                max="100"
+                step="0.25"
+                value="12.5"
+              />
+
+              <label for="foreignDemandWeight">
+                <span>Döviz ve Yabancı Talep</span><strong id="foreignDemandWeightValue">%12,5</strong>
+              </label>
+              <small class="weight-detail">Döviz bürosu, yabancılara gayrimenkul satışı</small>
+              <input
+                id="foreignDemandWeight"
+                data-group-weight="foreign_demand"
+                type="range"
+                min="0"
+                max="100"
+                step="0.25"
+                value="12.5"
+              />
+              <button class="weight-reset-button" id="resetParameterWeights" type="button">
+                Varsayılana Dön
+              </button>
+            </div>
+
+            <details class="multiplier-panel">
+              <summary>
+                <span>Öneri sınıfı katsayıları</span>
+                <small>7 sınıf</small>
+              </summary>
+              <div id="multiplierInputs" class="multiplier-inputs"></div>
+              <button class="text-button" id="resetMultipliers" type="button">
+                Varsayılan katsayılara dön
+              </button>
+            </details>
+
+            <button class="primary-button" id="calculateButton">Senaryoyu hesapla</button>
+            <div class="secondary-actions">
+              <button id="reloadButton">Excel’i yeniden seç</button>
+              <button id="downloadButton">Güncellenmiş Excel’i indir</button>
+            </div>
+            <p class="edit-note" id="editNote">
+              Tablodaki mevcut kadro hücreleri de düzenlenebilir.
+            </p>
+
+            <div class="scenario-note">
+              <strong>Model sınırı</strong>
+              <p>
+                Bu sürüm kâr veya poliçe tahmini yapmaz. Sonuçlar, illerin danışman
+                ihtiyacını, büyüme potansiyelini ve farklı senaryolarında kadronun nasıl
+                dağıtılabileceğini gösterir.
+              </p>
+            </div>
+          </aside>
+
+          <div class="dashboard-content">
+            <section class="kpi-grid" aria-label="Senaryo özeti">
+              <article class="kpi-card neutral">
+                <span>Hazırlık Hariç Mevcut Kadro</span>
+                <strong id="currentTotal">—</strong>
+              </article>
+              <article class="kpi-card gold" hidden>
+                <span>Model optimumu</span>
+                <strong id="modelOptimal">—</strong>
+                <small id="optimalRange">Kapasite bandı —</small>
+              </article>
+              <article class="kpi-card navy">
+                <span>Hazırlık Hariç Hedef Kadro</span>
+                <strong id="targetTotal">—</strong>
+              </article>
+              <article class="kpi-card positive" id="actionKpi">
+                <span>Büyüme</span>
+                <strong id="netChange">—</strong>
+                <small id="actionCityCount">— ilde aksiyon</small>
+              </article>
+              <article class="kpi-card preparation">
+                <span>Hazırlık kişi sayısı</span>
+                <strong id="preparationTotal">—</strong>
+              </article>
+              <article class="kpi-card tnw">
+                <span>TNW kadro</span>
+                <strong id="tnwTotal">—</strong>
+                <small>Mevcut kadro + hazırlık kişi sayısı</small>
+              </article>
+              <article class="kpi-card teal" hidden>
+                <span>Matematik kontrolü</span>
+                <strong id="exactTotal">—</strong>
+                <small>İl toplamı = hedef toplam</small>
+              </article>
+            </section>
+
+            <section class="chart-grid">
+              <article class="panel chart-panel">
+                <div class="panel-heading">
+                  <div>
+                    <h3>En büyük kadro değişimleri</h3>
+                  </div>
+                  <span>İlk 20 il</span>
+                </div>
+                <canvas id="changeChart" role="img" aria-label="En büyük kadro değişimleri grafiği"></canvas>
+              </article>
+              <article class="panel allocation-balance-panel">
+                <div class="panel-heading">
+                  <div>
+                    <p class="eyebrow">DANIŞMAN DAĞILIM DENGESİ</p>
+                    <h3>Hedef Kadro Dağılımının Temel Göstergelerle Uyumu</h3>
+                  </div>
+                </div>
+                <div class="spearman-explainer">
+                  <p><strong>Sıra (Spearman) Korelasyonu Nedir?</strong> iki değişken arasındaki ilişkinin yönünü ve gücünü gerçek değerler yerine bu değerlerin sıralarına (derecelerine) bakarak ölçen parametrik olmayan bir istatistiksel yöntemdir</p>
+                  <p><strong>Neden Burada Kullanıldı?</strong> İller arasında sonucu tek başına çarpıtabilecek uç örnekler var. Örneğin Şanlıurfa'nın nüfusu 2,2 milyon olmasına rağmen hiç danışmanı yok; buna karşılık nüfusu daha düşük olan Samsun'da (1,4 milyon) 52 danışman bulunuyor. Ham sayılarla hesaplanan klasik (Pearson) korelasyonda böyle bir il tek başına sonucu ciddi şekilde çarpıtabilir. Sıra korelayonu sıraya baktığı için bu tür tek bir aykırı ilin etkisi sınırlı kalır.</p>
+                  <p class="coefficient-scale"><strong>Katsayı Ne İfade Eder?</strong><br />-1 ile +1 arasında değişir: +1'e yaklaştıkça ilişkinin gücü artar , 0 tutarlı bir ilişki yok, -1'e yakınlaşması ise ters bir ilişki olduğunu gösterir.</p>
+                  <p id="potentialCorrelationExplanation"><strong>Buradaki Katsayıları Nasıl Değerlendirmeliyiz?</strong><br />Potansiyel uyumu, mevcut ve hedef kadronun ana İl Potansiyeli sıralamasıyla ilişkisini gösterir. Değerler senaryoya göre otomatik güncellenir.</p>
+                </div>
+                <div class="balance-legend" aria-label="Karşılaştırma açıklaması">
+                  <span><i class="current"></i>Mevcut kadro</span>
+                  <span><i class="recommended"></i>Hedef kadro</span>
+                </div>
+                <div id="allocationBalanceMetrics" class="allocation-balance-metrics"></div>
+                <div class="balance-interpretation" aria-live="polite">
+                  <span>DAĞITIM YORUMU</span>
+                  <p id="allocationBalanceNarrative">
+                    Bu göstergeler, hedef kadronun nüfus ve il potansiyeliyle uyumunu karşılaştırır.
+                    Büyümede yeni pozisyonlar nüfus ve yapısal göstergelerin birlikte işaret ettiği
+                    illere yönlendirilir; küçülmede ise illerin mevcut kadro payları korunur.
+                  </p>
+                </div>
+              </article>
+            </section>
+
+            <section class="panel gm-summary-panel" aria-labelledby="gmSummaryTitle">
+              <div class="panel-heading">
+                <div>
+                  <h3 id="gmSummaryTitle">Genel m&#252;d&#252;r yard&#305;mc&#305;l&#305;&#287;&#305; kadro &#246;zeti</h3>
+                </div>
+                <span id="gmSummaryStatus">T&#252;m gruplar</span>
+              </div>
+              <div class="gm-summary-grid" id="gmSummaryGrid"></div>
+            </section>
+
+            <section class="panel table-panel">
+              <div class="table-toolbar">
+                <div>
+                  <p class="eyebrow">İL BAZLI SONUÇLAR</p>
+                  <h3>Kadro Planı ve Aksiyon Listesi</h3>
+                </div>
+                <div class="filters">
+                  <input id="citySearch" type="search" placeholder="İl ara…" aria-label="İl ara" />
+                  <select id="recommendationFilter" aria-label="Öneri sınıfı filtresi">
+                    <option value="all">Tüm sınıflar</option>
+                  </select>
+                  <select id="actionFilter" aria-label="Aksiyon filtresi">
+                    <option value="all">Tüm aksiyonlar</option>
+                    <option value="İşe al">İşe al</option>
+                    <option value="Azalt / transfer et">Azalt / transfer et</option>
+                    <option value="Değişiklik yok">Değişiklik yok</option>
+                  </select>
+                </div>
+              </div>
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th aria-sort="none">
+                        <button class="sort-button" type="button" data-sort-key="city" data-sort-type="text">
+                          İl <span class="sort-indicator" aria-hidden="true">↕</span>
+                        </button>
+                      </th>
+                      <th aria-sort="none">
+                        <button class="sort-button" type="button" data-sort-key="general_directorate" data-sort-type="text">
+                          Genel Müdür Yardımcılığı <span class="sort-indicator" aria-hidden="true">↕</span>
+                        </button>
+                      </th>
+                      <th aria-sort="none">
+                        <button class="sort-button" type="button" data-sort-key="score" data-sort-type="number">
+                          Skor <span class="sort-indicator" aria-hidden="true">↕</span>
+                        </button>
+                      </th>
+                      <th aria-sort="none">
+                        <button class="sort-button" type="button" data-sort-key="population" data-sort-type="number">
+                          Nüfus <span class="sort-indicator" aria-hidden="true">↕</span>
+                        </button>
+                      </th>
+                      <th aria-sort="none">
+                        <button class="sort-button" type="button" data-sort-key="recommendation" data-sort-type="text">
+                          Öneri sınıfı <span class="sort-indicator" aria-hidden="true">↕</span>
+                        </button>
+                      </th>
+                      <th aria-sort="none">
+                        <button class="sort-button" type="button" data-sort-key="current_advisors" data-sort-type="number">
+                          Mevcut <span class="sort-indicator" aria-hidden="true">↕</span>
+                        </button>
+                      </th>
+                      <th aria-sort="none">
+                        <button class="sort-button" type="button" data-sort-key="recommended_advisors" data-sort-type="number">
+                          Önerilen <span class="sort-indicator" aria-hidden="true">↕</span>
+                        </button>
+                      </th>
+                      <th aria-sort="none">
+                        <button class="sort-button" type="button" data-sort-key="difference" data-sort-type="number">
+                          Fark <span class="sort-indicator" aria-hidden="true">↕</span>
+                        </button>
+                      </th>
+                      <th aria-sort="none">
+                        <button class="sort-button" type="button" data-sort-key="action" data-sort-type="text">
+                          Aksiyon <span class="sort-indicator" aria-hidden="true">↕</span>
+                        </button>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody id="allocationRows"></tbody>
+                </table>
+              </div>
+              <div class="table-footer">
+                <span id="rowCount">—</span>
+                <span>Mevcut kadroyu değiştirirsen “Senaryoyu hesapla” ile yeniden çalıştır.</span>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="tab-panel capacity-layout" id="tab-capacity">
+          <section class="capacity-hero panel">
+            <div>
+              <p class="eyebrow">KADRO DAĞILIM ANALİZİ</p>
+              <h2>Danışman kadrosu için analitik değerlendirme</h2>
+              <p>
+                Bu bölüm, mevcut ve hedef kadro dağılımını nüfus, il potansiyeli ve poliçe hacmi gibi temel göstergeler üzerinden değerlendirir. Bulgular, kadro kararları için karşılaştırmalı bir referans sunar; nihai kararı şekillendirmek yönetimin değerlendirmesine bırakılmıştır.
+              </p>
+            </div>
+            <div class="capacity-number">
+              <span>Mevcut Kadro</span>
+              <strong id="capacityCurrent">—</strong>
+              <small>Analizlerin başlangıç noktası</small>
+            </div>
+          </section>
+
+
+          <section class="capacity-grid">
+            <article class="panel current-staff-panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">MEVCUT KADRO DAĞILIMI</p>
+                  <h3>Mevcut kadronun il dağılımı</h3>
+                </div>
+                <span>İlk 10 il</span>
+              </div>
+              <canvas
+                id="currentStaffDistributionChart"
+                aria-label="Mevcut kadrosu en yüksek ilk 10 ilin yatay çubuk grafiği"
+              ></canvas>
+            </article>
+
+            <article class="panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">SINIF DAĞILIMI</p>
+                  <h3>Büyüme sınıflarının kadro etkisi</h3>
+                </div>
+              </div>
+              <div id="classImpactList" class="class-impact-list"></div>
+            </article>
+          </section>
+
+          <section class="panel model-validation-panel">
+            <div class="validation-visual">
+              <div class="validation-heading-row">
+                <div>
+                  <p class="eyebrow">MODEL TUTARLILIK TESTİ</p>
+                  <h3>Hedef kadro dağılımı mevcut poliçe hacmiyle ne kadar tutarlı?</h3>
+                </div>
+                <span><b id="validationSample">— il</b> • Doğrusal (Pearson) korelasyon</span>
+              </div>
+              <div class="validation-score-line">
+                <strong id="policyCorrelation">r = —</strong>
+                <span id="policyCorrelationStrength">Hesaplanıyor…</span>
+              </div>
+              <div class="scatter-legend" aria-hidden="true">
+                <span><i class="legend-dot provinces"></i>İller</span>
+                <span><i class="legend-dot istanbul"></i>İstanbul</span>
+                <span><i class="legend-line"></i>Eğilim çizgisi</span>
+              </div>
+              <div class="validation-chart-wrap">
+                <canvas
+                  id="validationScatter"
+                  role="img"
+                  aria-label="Mevcut poliçe hacmi ve hedef danışman sayısı dağılım grafiği"
+                ></canvas>
+                <div id="validationTooltip" class="validation-tooltip" hidden></div>
+              </div>
+              <div class="validation-proof-grid">
+                <div>
+                  <span>İstanbul hariç</span>
+                  <strong id="validationWithoutIstanbul">r = —</strong>
+                </div>
+                <div>
+                  <span>En büyük 3 il hariç</span>
+                  <strong id="validationWithoutTopThree">r = —</strong>
+                </div>
+                <div>
+                  <span>Analiz kapsamı</span>
+                  <strong id="validationScope">— il</strong>
+                </div>
+              </div>
+              <div class="validation-reading">
+                <strong>Grafik Nasıl Okunur?</strong>
+                <p>
+                  Her nokta bir ili temsil eder. Bir nokta eğilim çizgisine ne kadar yakınsa,
+                  o ildeki hedef danışman sayısı mevcut poliçe hacmiyle o kadar uyumludur.
+                </p>
+              </div>
+            </div>
+
+            <aside class="validation-insight">
+              <p class="eyebrow">YÖNETİCİ ÖZETİ</p>
+              <h3 id="policyCorrelationStatement">
+                Hedef dağılım ile mevcut poliçe hacmi karşılaştırılıyor.
+              </h3>
+
+              <div class="pearson-explainer">
+                <p><strong>Doğrusal (Pearson) Korelasyon Nedir?</strong> İki sayısal değişken arasındaki doğrusal ilişkinin yönünü ve gücünü ölçen istatistiksel bir yöntemdir.</p>
+                <p><strong>Neden Burada Kullanıldı?</strong> İllerdeki poliçe hacmi yükseldikçe hedef kadronun benzer doğrultuda ve orantılı şekilde artıp artmadığını ölçmek için kullanıldı. Buradaki soru yalnızca sıralamanın tutarlılığı değil, büyüklükler arasındaki orantısal ilişkidir; bu yüzden büyüklüğü ölçen Pearson korelasyonu tercih edildi, olası uç değer etkisi ise İstanbul ve en büyük 3 il ayrı ayrı çıkarılarak kontrol edildi. Böylece hedef dağılımın mevcut iş hacmiyle tutarlılığı tek bir katsayıyla değerlendirilebilir.</p>
+                <p><strong>Doğrusal (Pearson) Korelasyon Katsayısı (r) Nasıl Yorumlanır?</strong> Katsayı (r) −1 ile +1 arasındadır. r +1'e yaklaştıkça güçlü ve aynı yönlü, r 0'a yaklaştıkça zayıf, r −1'e yaklaştıkça güçlü ve ters yönlü doğrusal ilişki vardır. Katsayı bir başarı yüzdesi değildir.</p>
+              </div>
+
+              <p id="validationNarrative">
+                Hedef kadro dağılımı ile mevcut poliçe hacminin tutarlılığı değerlendiriliyor.
+              </p>
+
+              <p class="validation-caveat">
+                Ancak bu bir tutarlılık testidir; tek başına gelecekteki satış tahmini ya da
+                nedensellik kanıtı değildir; nihai kararda yerel koşullar da değerlendirilmelidir.
+              </p>
+            </aside>
+          </section>
+
+          <section class="panel market-signals-panel literature-potential-panel">
+            <div class="literature-heading-row">
+              <div>
+                <p class="eyebrow">İL POTANSİYELİ</p>
+                <h3>OECD–JRC Bileşik Gösterge Yaklaşımı Nedir ve Neden Kullanıldı?</h3>
+                <div class="potential-definition-card">
+                  <p>
+                    İl Potansiyeli, bir ilin danışman kadrosu açısından ne kadar öncelikli olduğunu tek bir sayıda özetler. Nüfus büyüklüğü ile illerin ekonomik ve yapısal göstergeleri (zenginlik ve finans, ekonomik hareketlilik, rakip firma aktifliği, döviz ve yabancı talep) ortak bir 0-100 ölçeğinde birleştirilerek hesaplanır.
+                  </p>
+                  <p>
+                    Bu birleştirme, OECD ve Avrupa Komisyonu'nun (EC-JRC) ülke ve bölge kıyaslamalarında kullandığı "bileşik gösterge" yöntemiyle yapılır — farklı ölçekteki göstergeleri (TL, adet, oran) önce ortak bir cetvele getirip, sonra belirlenen ağırlıklarla tek bir endekste birleştiren, uluslararası kabul görmüş bir yaklaşımdır.
+                  </p>
+                  <p>
+                    Bu yöntemi kullanmamızın nedeni: kadro kararlarını tek bir değişkene (örneğin sadece nüfusa) değil, o ilin gerçek ekonomik potansiyelini yansıtan çok boyutlu bir görünüme dayandırmak. Aksi halde nüfusu yüksek ama yapısal olarak zayıf bir il, kadro açısından yanlış önceliklendirilebilir.
+                  </p>
+                  <p>
+                    <strong>Yüksek İl Potansiyeli</strong> = o il, büyüme senaryolarında kadro artışında öncelik almalı demektir.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="potential-formula-launcher">
+              <div>
+                <strong>İl Potansiyeli nasıl hesaplanır?</strong>
+                <p>Gösterge dönüşümlerini, 0–100 ölçeklemesini ve kullanılan formülü ayrıntılı inceleyin.</p>
+              </div>
+              <button
+                class="potential-formula-button"
+                id="openPotentialFormula"
+                type="button"
+                aria-haspopup="dialog"
+                aria-controls="potentialFormulaModal"
+              >
+                Formülü görüntüle
+              </button>
+            </div>
+
+            <div
+              class="potential-modal"
+              id="potentialFormulaModal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="potentialFormulaModalTitle"
+              hidden
+            >
+              <section class="potential-modal-dialog" role="document">
+                <header class="potential-modal-header">
+                  <h3 id="potentialFormulaModalTitle">İl Potansiyeli Nasıl Hesaplanır?</h3>
+                  <button
+                    class="potential-modal-close"
+                    id="closePotentialFormula"
+                    type="button"
+                    aria-label="Formül penceresini kapat"
+                  >×</button>
+                </header>
+                <div class="potential-modal-content">
+                  <article class="potential-modal-step">
+                    <h4>1. Göstergelerin dönüştürülmesi</h4>
+                    <p>Çarpık hacim ve adet göstergelerinde önce:</p>
+                    <span class="potential-modal-equation">Dönüştürülmüş Değer = log(1 + Gerçek Değer)</span>
+                    <p><strong>Log uygulanan göstergeler:</strong></p>
+                    <ul>
+                      <li>Mevduat</li>
+                      <li>Satış</li>
+                      <li>Taşıt</li>
+                      <li>Toplam banka şubesi</li>
+                      <li>ATM</li>
+                      <li>Döviz bürosu</li>
+                      <li>Yabancılara gayrimenkul satışı</li>
+                    </ul>
+                    <p>Nüfus, GSYH, konut fiyatı, sigortalılık oranı ve istihdama log uygulanmaz; gerçek değerleri kullanılır.</p>
+                  </article>
+
+                  <article class="potential-modal-step">
+                    <h4>2. Her göstergenin 0–100 ölçeğine çevrilmesi</h4>
+                    <p>Her gösterge 81 il arasında ayrı ayrı ölçeklenir:</p>
+                    <span class="potential-modal-equation">Gösterge Puanı = [(Dönüştürülmüş Değer − En Düşük Değer) / (En Yüksek Değer − En Düşük Değer)] × 100</span>
+                    <p><strong>Bu nedenle:</strong></p>
+                    <ul>
+                      <li>En düşük değere sahip il o göstergede 0,</li>
+                      <li>En yüksek değere sahip il 100,</li>
+                      <li>Diğer iller gerçek konumlarına göre 0–100 arasında değer alır.</li>
+                    </ul>
+                  </article>
+
+                  <article class="potential-modal-step">
+                    <h4>3. Dört gösterge grubunun hesaplanması</h4>
+                    <span class="potential-modal-equation">Zenginlik ve Finans = (GSYH + Konut Fiyatı + Mevduat + Sigortalılık Oranı) / 4</span>
+                    <span class="potential-modal-equation">Ekonomik Hareketlilik = (Satış + İstihdam + Taşıt) / 3</span>
+                    <span class="potential-modal-equation">Rakip Firma Aktifliği = (Toplam Banka Şubesi + ATM) / 2</span>
+                    <span class="potential-modal-equation">Döviz ve Yabancı Talep = (Döviz Bürosu + Yabancılara Gayrimenkul Satışı) / 2</span>
+                    <p>Buradaki göstergeler ham sayılar değil, ikinci adımda hesaplanan 0–100 arasındaki değerlerdir.</p>
+                  </article>
+
+                  <article class="potential-modal-step">
+                    <h4>4. Nihai İl Potansiyeli</h4>
+                    <p><strong>Varsayılan ağırlıklarla:</strong></p>
+                    <span class="potential-modal-equation">İl Potansiyeli = 0,50 × Nüfus + 0,125 × Zenginlik ve Finans + 0,125 × Ekonomik Hareketlilik + 0,125 × Rakip Firma Aktifliği + 0,125 × Döviz ve Yabancı Talep</span>
+                    <p><strong>Genel dinamik formül:</strong></p>
+                    <span class="potential-modal-equation">İl Potansiyeli = wₙ×Nüfus + w₁×Zenginlik ve Finans + w₂×Ekonomik Hareketlilik + w₃×Rakip Firma Aktifliği + w₄×Döviz ve Yabancı Talep</span>
+                    <p>Ağırlıkların toplamı her zaman %100’dür. Danışman Dağılımı sayfasındaki ağırlıklar değiştirildiğinde formülün katsayıları ve bütün il sonuçları otomatik olarak güncellenir.</p>
+                  </article>
+
+                  <article class="potential-example-card">
+                    <header class="potential-example-header">
+                      <div>
+                        <h4>Uygulamalı Örnek: Bir İlin Hesabını İnceleyin</h4>
+                        <p>Seçtiğiniz ilin değerleri, güncel parametre ağırlıklarıyla adım adım hesaplanır.</p>
+                      </div>
+                      <label class="potential-example-select" for="potentialExampleCity">
+                        <span>İl seçimi</span>
+                        <select id="potentialExampleCity" aria-label="Hesabı incelenecek ili seçin"></select>
+                      </label>
+                    </header>
+                    <div
+                      class="potential-example-body"
+                      id="potentialExampleBody"
+                      aria-live="polite"
+                    >
+                      <p class="potential-example-empty">İl verileri hazırlanıyor…</p>
+                    </div>
+                  </article>
+                </div>
+              </section>
+            </div>
+
+            <div class="market-signals-layout">
+              <div class="market-signal-leaders">
+                <div class="market-subheading">
+                  <strong>Potansiyeli en yüksek iller</strong>
+                  <span>İlk 15 il</span>
+                </div>
+                <div class="signal-grid" id="literatureSignalCards"></div>
+              </div>
+
+              <div class="market-position-card">
+                <div class="market-subheading">
+                  <div>
+                    <strong>81 il • potansiyel konumlandırması</strong>
+                    <small>Nüfus × Skor • Baloncuk: İl Potansiyeli</small>
+                  </div>
+                  <span>81 il</span>
+                </div>
+                <div id="literatureClassLegend" class="market-class-legend"></div>
+                <div class="market-position-chart-wrap">
+                  <canvas
+                    id="literaturePositionChart"
+                    role="img"
+                    aria-label="81 ilin danışman dağılımında kullanılan potansiyel görünümü"
+                  ></canvas>
+                  <div id="literaturePositionTooltip" class="validation-tooltip" hidden></div>
+                </div>
+              </div>
+            </div>
+
+            <aside class="market-insight-callout" aria-label="Grafik yorum notu">
+              <span class="market-insight-callout__icon" aria-hidden="true">i</span>
+              <div>
+                <strong>Grafik Yorumu</strong>
+                <p>
+                  Grafikteki sol üst bölge (yüksek skor, düşük nüfus) kritik: bu iller nüfus büyüklüğü açısından öne çıkmasa da il potansiyeli açısından güçlü gözüküyor. Danışman tahsisinde sadece nüfusa değil, skor+nüfus bileşimine göre önceliklendirme yapılması bu illerdeki fırsatın kaçırılmamasını sağlar. Özellikle Bursa ve Kocaeli planlı büyüme sınıfında olduğundan burada mevcut durumdan daha fazla oranda ilgi gösterilmelidir.
+                </p>
+                <div class="market-insight-callout__method-context">
+                  <strong>OECD/EC-JRC nedir?</strong>
+                  <p>
+                    OECD (İktisadi İşbirliği ve Kalkınma Teşkilatı), Türkiye'nin de üyesi olduğu 38 ülkenin bir araya geldiği uluslararası kuruluş; EC-JRC ise Avrupa Komisyonu'nun bilimsel araştırma birimi. İkisi birlikte, ülke ve bölgeleri kıyaslamak için kullanılan resmi istatistik yöntemlerini geliştirir. Bu endeks, onların 2008'de yayımladığı ve OECD Yaşam Endeksi, Avrupa İnovasyon Endeksi gibi dünya genelinde tanınan endekslerde kullanılan standart "bileşik gösterge" kılavuzuna dayanır — yani özel bir formül değil, uluslararası kabul görmüş bir yöntemdir.
+                  </p>
+                </div>
+              </div>
+            </aside>
+
+            <p class="literature-source-note">
+              Yöntem dayanağı:
+              <a href="https://www.oecd.org/en/publications/handbook-on-constructing-composite-indicators-methodology-and-user-guide_9789264043466-en.html" target="_blank" rel="noreferrer">OECD / European Union / EC-JRC (2008), Handbook on Constructing Composite Indicators</a>
+              ve
+              <a href="https://knowledge4policy.ec.europa.eu/composite-indicators/toolkit_en" target="_blank" rel="noreferrer">EC-JRC Composite Indicators &amp; Scoreboards Toolkit</a>.
+            </p>
+          </section>
+        </section>
+
+        <section class="tab-panel method-layout" id="tab-method">
+          <section class="method-intro panel">
+            <p class="eyebrow">NEDEN BU MODELİ KURDUK?</p>
+            <p>
+              Şirkette il bazlı danışman sayıları bugüne kadar çoğunlukla geçmiş
+              alışkanlıklara, anlık ihtiyaçlara veya il sorumlularının talebi üzerine yapılan
+              işe alımlara göre şekilleniyordu; nüfus ve potansiyel gibi yapısal göstergelerle
+              sistematik bir bağ kurulmuyor, şirket büyüme ya da küçülme kararı aldığında
+              “hangi ilde kaç danışman olmalı?” sorusunun nesnel ve tekrarlanabilir bir yanıtı
+              olmuyordu. Bu çalışma, illerin yapısal gücünü ve potansiyelini ölçerek elimizdeki
+              toplam kadroyu 81 ile daha dengeli ve veriye dayalı biçimde dağıtan bir karar
+              destek sistemidir; böylece hem büyüme hem küçülme senaryolarında il bazlı
+              kararlar sezgiden çıkıp veriye dayanıyor.
+            </p>
+          </section>
+          <section class="method-intro panel">
+            <p class="eyebrow">MODEL AKIŞI</p>
+            <h2>Veriden il bazlı kadro kararına</h2>
+            <p>
+              Modelde önce 81 ilin yapısal gücünü yansıtan il skorları hesaplanır — nüfus,
+              GSYH, banka şubesi yoğunluğu, emlak ve mevcut poliçe/sigortalı verisi gibi
+              göstergelerin bileşiminden oluşur. Bu skorlar, parametre ağırlıkları ve öneri
+              sınıfı katsayılarıyla birleştirilerek her il için bir dağıtım önceliği
+              oluşturulur. Yönetimin kişi bazında belirlediği net değişim veya seçili GMY
+              kapsamının mevcut kadrosu üzerinden belirlediği yüzde değişimi; büyümede bu
+              önceliğe göre paylaştırılır, küçülmede ise operasyonel
+              istikrarı korumak amacıyla illerin mevcut kadro payları büyük ölçüde muhafaza
+              edilerek 81 ile dağıtılır.
+            </p>
+          </section>
+          <section class="steps-grid">
+            <article>
+              <span>01</span>
+              <h3>İllerin yapısal gücü değerlendirilir</h3>
+              <p>Ekonomik, finansal ve sektörel göstergelere bakılarak illerin yapısal gücünü temsil eden il skoru belirlenir.</p>
+            </article>
+            <article>
+              <span>02</span>
+              <h3>Parametre ağırlıkları belirlenir</h3>
+              <p>Nüfus ve dört yapısal grubun dağıtım üzerindeki etkisi, yönetimin seçtiği ağırlıklarla belirlenir.</p>
+            </article>
+            <article>
+              <span>03</span>
+              <h3>Hedef kadro belirlenir</h3>
+              <p>Yönetimin toplam kişi veya net değişim kararı, dağıtımın kesin hedefi olarak alınır.</p>
+            </article>
+            <article>
+              <span>04</span>
+              <h3>Hedef kadro illere dağıtılır</h3>
+              <p>Belirlenen toplam, büyüme veya küçülme kuralına göre illere tam sayı olarak dağıtılır.</p>
+            </article>
+          </section>
+          <section class="method-grid">
+            <article class="panel">
+              <p class="eyebrow">BÜYÜMEDE</p>
+              <h3>Mevcut düzen korunur</h3>
+              <p>
+                Hedef mevcut toplamın üstündeyse hiçbir ilden danışman çekilmez. Yeni
+                pozisyonlar; nüfus, il skoru, parametre ağırlıkları ve öneri sınıfı
+                katsayılarıyla oluşan dağıtım önceliğine göre birer birer eklenir. Böylece
+                yüksek öncelikli iller daha fazla pay alırken düşük öncelikli çok sayıda
+                ilde kontrolsüz kadro açılması sınırlandırılır.
+              </p>
+            </article>
+            <article class="panel">
+              <p class="eyebrow">KÜÇÜLMEDE</p>
+              <h3>Mevcut il payları korunur</h3>
+              <p>
+                Hedef mevcut toplamın altındaysa her ilin Türkiye kadrosundaki mevcut payı
+                mümkün olan en düşük yuvarlama sapmasıyla korunur. En büyük kalan yöntemi,
+                il sonuçlarının toplamını hedef kadroya kesin olarak eşitler.
+              </p>
+            </article>
+            <article class="panel caution">
+              <p class="eyebrow">YÖNETİMSEL SINIR</p>
+              <h3>Sonuç, tanımlı kurallara bağlıdır</h3>
+              <p>
+                Modelin sonucu, seçilen ağırlıkların ve sınıf katsayılarının matematiksel
+                karşılığıdır. Saha kapasitesi, bütçe ve işe alım süresi gibi etkenler modele
+                eklenmediği sürece model bunları kendiliğinden varsaymaz.
+              </p>
+            </article>
+          </section>
+          <section class="panel audit-panel">
+            <p class="eyebrow">VERİ İZİ</p>
+            <h3>Dashboard hangi dosyadan besleniyor?</h3>
+            <dl>
+              <div><dt>Dosya</dt><dd id="auditFile">—</dd></div>
+              <div><dt>Son değiştirilme</dt><dd id="auditModified">—</dd></div>
+              <div><dt>İl sayısı</dt><dd id="auditCities">—</dd></div>
+              <div><dt>Nüfus toplamı</dt><dd id="auditPopulation">—</dd></div>
+              <div><dt>Sıfır kadrolu il</dt><dd id="auditZeroCities">—</dd></div>
+            </dl>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <!-- Modüler ve Bağımsız Kütüphaneler / Motorlar -->
+    <script src="js/vendor/jszip.min.js"></script>
+    <script src="js/engine/model.js"></script>
+    <script src="js/engine/excel-handler.js"></script>
+    <script src="js/app.js"></script>
+
+  </body>
+</html>

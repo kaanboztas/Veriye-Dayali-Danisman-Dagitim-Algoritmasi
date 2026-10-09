@@ -1,0 +1,30 @@
+# ==============================================================================
+# GİZLİLİK VE VERİ GÜVENLİĞİ KURALLARI (.gitignore)
+# ==============================================================================
+# Veri dosyalarını (Excel, CSV, DB) ve gizli anahtarları kesinlikle hariç tutar.
+
+# Veri Dosyaları (Data Files) - ASLA PAYLAŞILMAZ
+*.xlsx
+*.xls
+*.csv
+!schema/sample_template.csv
+*.sqlite
+*.db
+*.parquet
+*.jsonl
+
+# Hassas Bilgiler ve Anahtarlar (Secrets & Keys)
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+*.cert
+
+# Python & Sistem Geçici Dosyaları
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.DS_Store
+Thumbs.db

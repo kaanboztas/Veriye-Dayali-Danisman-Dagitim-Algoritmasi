@@ -1,0 +1,7 @@
+# Kadro Planlama ve Optimizasyon Motoru
+# Temel motor standart Python 3 kütüphanesi ile sıfır harici bağımlılıkla çalışır.
+# Aşağıdaki paketler Excel ve veri bilimi analizleri için opsiyoneldir:
+
+# Opsiyonel Veri Analizi ve Excel Desteği:
+openpyxl>=3.1.0
+pandas>=2.0.0

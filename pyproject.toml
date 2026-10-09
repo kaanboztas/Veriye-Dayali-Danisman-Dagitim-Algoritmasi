@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kadro-planlama-engine"
+version = "5.0.0"
+description = "Dinamik Sınıf Payı Modeli V5 - Danışman Kadro Planlama ve Kapasite Optimizasyonu"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [
+    { name = "Kadro Planlama Ekibi" }
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
